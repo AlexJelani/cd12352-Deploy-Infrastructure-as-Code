@@ -1,10 +1,9 @@
 Parameters:
-
   ExerciseName:
     Type: String
     Description: Tag name for our resources
     Default: udacity-rds-exercise
-  
+
   RdsMasterUsername:
     Type: String
     Description: Username for the RDS database
@@ -14,28 +13,25 @@ Parameters:
     Description: Password for the RDS database
 
 Resources:
-
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Security group for MyWebAPP database
       VpcId:
-        Fn::ImportValue:
-          !Sub "${ExerciseName}-vpc-id"
+        Fn::ImportValue: !Sub '${ExerciseName}-vpc-id'
       SecurityGroupIngress:
-      - IpProtocol: tcp
-        FromPort: 3306
-        ToPort: 3306
-        CidrIp: 10.10.0.0/24
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          CidrIp: 10.10.0.0/24
 
   DBSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
       DBSubnetGroupDescription: DB subnet group for MyWebAPP database
       SubnetIds: !Split
-      - ","
-      - Fn::ImportValue:
-          !Sub "${ExerciseName}-private-subnets"
+        - ','
+        - Fn::ImportValue: !Sub '${ExerciseName}-private-subnets'
 
   DBParameterGroup:
     Type: AWS::RDS::DBParameterGroup
@@ -56,7 +52,7 @@ Resources:
       DBInstanceClass: db.t3.micro
       DBInstanceIdentifier: mywebapp-rds-instance
       Engine: mysql
-      EngineVersion: "8.0.32"
+      EngineVersion: '8.0.32'
       DeletionProtection: true
       DBSubnetGroupName: !Ref DBSubnetGroup
       DBParameterGroupName: !Ref DBParameterGroup

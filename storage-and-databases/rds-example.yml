@@ -1,5 +1,4 @@
 Parameters:
-
   EnvironmentName:
     Description: An environment name that will be prefixed to resource names
     Type: String
@@ -18,20 +17,18 @@ Parameters:
     Description: Password for the RDS database
 
 Resources:
-
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupName: !Ref ExampleName
       GroupDescription: DB Security group for RDS example
       VpcId:
-        Fn::ImportValue:
-          !Sub "${EnvironmentName}-VPCID"
+        Fn::ImportValue: !Sub '${EnvironmentName}-VPCID'
       SecurityGroupIngress:
-      - IpProtocol: tcp
-        FromPort: 5432
-        ToPort: 5432
-        CidrIp: 10.10.0.0/24
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          CidrIp: 10.10.0.0/24
 
   DBSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
@@ -39,9 +36,8 @@ Resources:
       DBSubnetGroupName: !Ref ExampleName
       DBSubnetGroupDescription: DB subnet group for RDS example
       SubnetIds: !Split
-      - ","
-      - Fn::ImportValue:
-          !Sub "${EnvironmentName}-PRIV-NETS"
+        - ','
+        - Fn::ImportValue: !Sub '${EnvironmentName}-PRIV-NETS'
 
   DBParameterGroup:
     Type: AWS::RDS::DBParameterGroup
@@ -59,14 +55,14 @@ Resources:
     Properties:
       AllocatedStorage: '20'
       AllowMajorVersionUpgrade: false
-      AutoMinorVersionUpgrade: true      
+      AutoMinorVersionUpgrade: true
       DBName: exampledb
       DBInstanceClass: db.t3.micro
       DBInstanceIdentifier: !Ref ExampleName
       VPCSecurityGroups:
         - !Ref SecurityGroup
       Engine: postgres
-      EngineVersion: "15.2"
+      EngineVersion: '15.2'
       DBSubnetGroupName: !Ref DBSubnetGroup
       DBParameterGroupName: !Ref DBParameterGroup
       MasterUsername: !Ref RdsMasterUsername

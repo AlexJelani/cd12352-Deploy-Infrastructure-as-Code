@@ -1,16 +1,14 @@
 Parameters:
-
   EnvironmentName:
     Type: String
     Description: Prefix name for our resources
 
 Resources:
-
-  VPC: 
+  VPC:
     Type: AWS::EC2::VPC
     Properties:
-        CidrBlock: 10.2.0.0/16
-        EnableDnsHostnames: true
-        Tags: 
-          - Key: Name 
-            Value: !Ref EnvironmentName
+      CidrBlock: 10.2.0.0/16
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Ref EnvironmentName
