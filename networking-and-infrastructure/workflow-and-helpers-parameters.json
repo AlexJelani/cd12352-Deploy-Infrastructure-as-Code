@@ -1,7 +1,3 @@
-/**
- * Defines a parameter for the "EnvironmentName" parameter in the CloudFormation stack.
- * This parameter specifies the name of the environment, which is used to identify the deployment.
- */
 [
     {
         "ParameterKey": "EnvironmentName",
