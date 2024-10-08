@@ -1,0 +1,6 @@
+---
+rules:
+  line-length:
+    max: 120  # Adjust as needed
+  indentation:
+    spaces: consistent  # Enforce consistent indentation
