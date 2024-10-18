@@ -129,6 +129,7 @@ Resources:
         - Key: Name
           Value: 
             Fn::Sub: ${ProjectName}-private-2
+
   NatGateway1:
     Type: AWS::EC2::NatGateway
     Properties:
@@ -138,7 +139,10 @@ Resources:
           - AllocationId
       SubnetId: 
         Ref: PublicSubnet1
-
+      Tags:
+        - Key: Name
+          Value: 
+            Fn::Sub: ${ProjectName}-nat-gateway-1
   NatGateway2:
     Type: AWS::EC2::NatGateway
     Properties:
@@ -148,3 +152,27 @@ Resources:
           - AllocationId
       SubnetId: 
         Ref: PublicSubnet2
+      Tags:
+        - Key: Name
+          Value: 
+            Fn::Sub: ${ProjectName}-nat-gateway-2
+
+  NatGateway1EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value: 
+            Fn::Sub: ${ProjectName}-nat-gateway-1
+
+  NatGateway2EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value: 
+            Fn::Sub: ${ProjectName}-nat-gateway-2
