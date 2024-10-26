@@ -1,0 +1,64 @@
+Parameters:
+  ExerciseName:
+    Type: String
+    Description: Tag name for our resources
+    Default: udacity-rds-exercise
+    
+  MasterUsername:
+    Type: String
+    NoEcho: true
+    Description: Database admin account username
+    
+  MasterUserPassword:
+    Type: String
+    NoEcho: true
+    Description: Database admin account password
+
+Resources:
+  DBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Database security group
+      VpcId: 
+        Fn::ImportValue: !Sub ${ExerciseName}-vpc-id
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          CidrIp: 10.10.0.0/24
+          
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet group for RDS database
+      SubnetIds: 
+        - Fn::ImportValue: !Sub ${ExerciseName}-private-subnet1
+        - Fn::ImportValue: !Sub ${ExerciseName}-private-subnet2
+        
+  DBParameterGroup:
+    Type: AWS::RDS::DBParameterGroup
+    Properties:
+      Family: mysql8.0
+      Description: Custom parameter group for MySQL
+      Parameters:
+        innodb_buffer_pool_instances: "1"
+        innodb_buffer_pool_size: "134217728"
+        max_connections: "1000"
+        
+  MySQLDatabase:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Snapshot
+    Properties:
+      DBName: mywebapp
+      Engine: mysql
+      EngineVersion: 8.0.32
+      DBInstanceClass: db.t3.micro
+      AllocatedStorage: 20
+      MasterUsername: !Ref MasterUsername
+      MasterUserPassword: !Ref MasterUserPassword
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      VPCSecurityGroups: 
+        - !Ref DBSecurityGroup
+      DBParameterGroupName: !Ref DBParameterGroup
+      PubliclyAccessible: false
+      DeletionProtection: true

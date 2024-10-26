@@ -37,7 +37,7 @@ Resources:
       DBSubnetGroupDescription: DB subnet group for RDS example
       SubnetIds: !Split
         - ','
-        - Fn::ImportValue: !Sub '${EnvironmentName}-PRIV-NETS'
+        - Fn::ImportValue: !Sub '${EnvironmentName}-private-subnets'
 
   DBParameterGroup:
     Type: AWS::RDS::DBParameterGroup

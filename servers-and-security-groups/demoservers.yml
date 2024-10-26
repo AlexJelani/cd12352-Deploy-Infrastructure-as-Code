@@ -58,7 +58,8 @@ Resources:
   WebAppInstanceRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub '${EnvironmentName}-web-servers'
+      RoleName: 
+        Fn::Sub: '${EnvironmentName}-web-servers'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -77,8 +78,7 @@ Resources:
                 Action:
                   - 's3:GetObject'
                 Resource:
-                  - !Sub 'arn:aws:s3:::any-bucket-name/*'
-
+                  - Fn::Sub: 'arn:aws:s3:::any-bucket-name/*'
   WebAppInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:

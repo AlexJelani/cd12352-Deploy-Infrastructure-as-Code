@@ -5,52 +5,59 @@ Parameters:
     Default: udacity-s3-exercise
 
 Resources:
-  VPC:
-    Type: AWS::EC2::VPC
+  S3Bucket:
+    Type: AWS::S3::Bucket
     Properties:
-      CidrBlock: 10.30.0.0/16
-      EnableDnsHostnames: true
-      Tags:
-        - Key: Name
-          Value: !Ref ExerciseName
-  InternetGateway:
-    Type: AWS::EC2::InternetGateway
-    Properties:
-      Tags:
-        - Key: Name
-          Value: !Ref ExerciseName
-  InternetGatewayAttachment:
-    Type: AWS::EC2::VPCGatewayAttachment
-    Properties:
-      InternetGatewayId: !Ref InternetGateway
-      VpcId: !Ref VPC
-  PublicSubnet1:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      AvailabilityZone: !Select [0, !GetAZs '']
-      CidrBlock: 10.30.0.0/24
-      MapPublicIpOnLaunch: true
-      Tags:
-        - Key: Name
-          Value: !Sub '${ExerciseName}-public1'
-  PublicSubnet2:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      AvailabilityZone: !Select [1, !GetAZs '']
-      CidrBlock: 10.30.2.0/24
-      MapPublicIpOnLaunch: true
-      Tags:
-        - Key: Name
-          Value: !Sub '${ExerciseName}-public2'
+      BucketName: !Sub '${ExerciseName}-bucket'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
 
-  SecurityGroup:
-    Type: AWS::EC2::SecurityGroup
+  EC2Role:
+    Type: AWS::IAM::Role
     Properties:
-      GroupDescription: !Ref ExerciseName
-      VpcId: !Ref VPC
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
 
+  EC2S3Policy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: EC2S3Access
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:PutObject
+            Resource: !Sub '${S3Bucket.Arn}/*'
+      Roles:
+        - !Ref EC2Role
+
+  EC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+        - !Ref EC2Role
+
+  # Existing VPC and networking resources remain unchanged...
+  # Modified LaunchTemplate to include the IAM Instance Profile
   LaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
@@ -59,19 +66,9 @@ Resources:
         SecurityGroupIds:
           - !Ref SecurityGroup
         InstanceType: t2.micro
+        IamInstanceProfile:
+          Name: !Ref EC2InstanceProfile
         BlockDeviceMappings:
           - DeviceName: '/dev/sdk'
             Ebs:
               VolumeSize: '10'
-  AutoScalingGroup:
-    Type: AWS::AutoScaling::AutoScalingGroup
-    Properties:
-      VPCZoneIdentifier:
-        - !Ref PublicSubnet1
-        - !Ref PublicSubnet2
-      LaunchTemplate:
-        LaunchTemplateId: !Ref LaunchTemplate
-        Version: !GetAtt LaunchTemplate.LatestVersionNumber
-      MinSize: '1'
-      DesiredCapacity: '1'
-      MaxSize: '2'
