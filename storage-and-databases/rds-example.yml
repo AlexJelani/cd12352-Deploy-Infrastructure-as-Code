@@ -62,7 +62,7 @@ Resources:
       VPCSecurityGroups:
         - !Ref SecurityGroup
       Engine: postgres
-      EngineVersion: '15.2'
+      EngineVersion: '15.4'
       DBSubnetGroupName: !Ref DBSubnetGroup
       DBParameterGroupName: !Ref DBParameterGroup
       MasterUsername: !Ref RdsMasterUsername
